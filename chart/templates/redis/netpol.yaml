@@ -1,0 +1,34 @@
+{{- if and .Values.redis.enabled .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ro-crate-validator.fullname" . }}-redis
+  labels:
+    {{- include "ro-crate-validator.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ro-crate-validator.labels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # allow from celery and validator
+    - ports:
+        - port: {{ .Values.redis.service.port }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "ro-crate-validator.labels" . | nindent 14 }}
+              app.kubernetes.io/component: celery
+        - podSelector:
+            matchLabels:
+              {{- include "ro-crate-validator.labels" . | nindent 14 }}
+              app.kubernetes.io/component: validator
+
+  # All egress blocked
+
+{{- end }}

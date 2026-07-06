@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "ro-crate-validator.fullname" . }}-test-validator"
+  labels:
+    {{- include "ro-crate-validator.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: docker.io/alpine/curl:latest
+      command:
+        - curl
+      args:
+        - -f
+        - -v
+        - -X
+        - POST
+        - http://{{ include "ro-crate-validator.fullname" . }}:{{ .Values.service.port }}/v1/ro_crates/validate_metadata
+        - -H
+        - 'accept: application/json'
+        - -H
+        - 'Content-Type: application/json'
+        - -d
+        - '{ "crate_json": "{\"test1\":\"test2\"}" }'
+  restartPolicy: Never
+
+
+# curl -X POST http://localhost:5000/v1/ro_crates/validate_metadata -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "crate_json": "{\"test1\":\"test2\"}" }'
+

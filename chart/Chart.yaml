@@ -1,0 +1,11 @@
+apiVersion: v2
+name: ro-crate-validator
+description: A service for validating RO-Crates
+
+type: application
+
+# The chart version, follows semver. This may be different from the application version.
+version: 0.1.0
+
+# This is the version number of the application being deployed.
+appVersion: "1.1.2"

@@ -1,0 +1,78 @@
+{{- if .Values.celery.enabled }}
+{{ $defaultRedisUrl := printf "redis://%s-redis:%v/0" (include "ro-crate-validator.fullname" .) .Values.redis.service.port }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ro-crate-validator.fullname" . }}-celery
+  labels:
+    {{- include "ro-crate-validator.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery
+spec:
+  replicas: {{ .Values.celery.replicas }}
+  selector:
+    matchLabels:
+      {{- include "ro-crate-validator.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: celery
+  template:
+    metadata:
+      {{- with .Values.celery.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ro-crate-validator.labels" . | nindent 8 }}
+        app.kubernetes.io/component: celery
+        {{- with .Values.celery.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ro-crate-validator.serviceAccountName" . }}
+      {{- with .Values.celery.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: celery
+          {{- with .Values.celery.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.celery.image.repository | default .Values.image.repository }}:{{ .Values.celery.image.tag | default .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.celery.image.pullPolicy }}
+          command: {{ .Values.celery.command }}
+          args: {{ .Values.celery.args | toJson }}
+          env:
+            - name: CELERY_BROKER_URL
+              value: {{ .Values.redis.celeryBrokerUrl | default $defaultRedisUrl }}
+            - name: CELERY_RESULT_BACKEND
+              value: {{ .Values.redis.celeryResultBackend | default $defaultRedisUrl }}
+          {{- with .Values.celery.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.celery.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.celery.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
