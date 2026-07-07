@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: j178/prek-action@v2.0.5
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_REVISION: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # https://github.com/jupyterhub/action-k3s-helm/
+      - uses: jupyterhub/action-k3s-helm@v4
+        with:
+          k3s-channel: v1.36
+
+      - name: Install deployment
+        run: helm upgrade --install ro-crate-validator ./chart --wait
+
+      - name: Run tests
+        run: helm test ro-crate-validator --timeout=70s
+
+      - name: Get logs, including on failure
+        if: always()
+        run: |
+          for deploy in ro-crate-validator ro-crate-validator-celery ro-crate-validator-redis; do
+            echo "::group::$deploy"
+            kubectl logs deploy/$deploy
+            echo "::endgroup::"
+          done
+
+          echo "::group::ro-crate-validator-test-validator"
+          kubectl logs ro-crate-validator-test-validator
+          echo "::endgroup::"
+
+  # Set a single status check for the whole workflow, so that we can use it in a
+  # branch protection rule
+  status-check:
+    runs-on: ubuntu-24.04
+    needs:
+      - lint
+      - test
+    if: always()
+    steps:
+      - name: Get job statuses
+        uses: technote-space/workflow-conclusion-action@v3.0.3
+        with:
+          FALLBACK_CONCLUSION: failure
+          STRICT_SUCCESS: true
+        # Status is saved in env.WORKFLOW_CONCLUSION
+
+      - name: Status check
+        if: env.WORKFLOW_CONCLUSION != 'success'
+        run: |
+          exit 1

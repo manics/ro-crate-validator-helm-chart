@@ -1,5 +1,7 @@
 # RO-Crate Validator Helm Chart
 
+[![CI](https://github.com/manics/ro-crate-validator-helm-chart/actions/workflows/ci.yaml/badge.svg)](https://github.com/manics/ro-crate-validator-helm-chart/actions/workflows/ci.yaml)
+
 A Helm chart for https://github.com/eScienceLab/RO-Crate-Validation-Service
 
 ## Supported features
@@ -18,6 +20,7 @@ helm upgrade --install ro-crate-validator ./chart --wait [--values config.yaml]
 ```
 
 Built-in smoke test
+
 ```sh
 helm test ro-crate-validator [--timeout=70s]
 ```
