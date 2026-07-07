@@ -1,9 +1,31 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "ro-crate-validator.fullname" . }}-test-validator"
+  labels:
+    {{- include "ro-crate-validator.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    "helm.sh/hook": test
+data:
+  dummy.json: |
+    {
+      "crate_json": "{\"test1\":\"test2\"}"
+    }
+  ro-crate-metadata-test.json: |
+    {
+      "crate_json": "{\n    \"@context\": \"https://w3id.org/ro/crate/1.1/context\",\n    \"@graph\": [\n        {\n            \"@id\": \"./\",\n            \"@type\": \"Dataset\",\n            \"name\": \"example dataset\",\n            \"description\": \"crate that should conform with validator requirements\",\n            \"datePublished\": \"2024-03-17T15:55:54+00:00\",\n            \"license\": {\n                \"@id\": \"http://spdx.org/licenses/MIT\"\n            },\n            \"hasPart\": [\n                {\n                    \"@id\": \"results.csv\"\n                }\n            ]\n        },\n        {\n            \"@id\": \"ro-crate-metadata.json\",\n            \"@type\": \"CreativeWork\",\n            \"about\": {\n                \"@id\": \"./\"\n            },\n            \"conformsTo\": {\n                \"@id\": \"https://w3id.org/ro/crate/1.1\"\n            }\n        },\n        {\n            \"@id\": \"results.csv\",\n            \"@type\": \"File\",\n            \"author\": {\n                \"@id\": \"https://orcid.org/0000-0000-0000-0000\"\n            },\n            \"encodingFormat\": \"text/csv\",\n            \"name\": \"experimental data\"\n        },\n        {\n            \"@id\": \"https://orcid.org/0000-0000-0000-0000\",\n            \"@type\": \"Person\",\n            \"affiliation\": \"University of Flatland\",\n            \"name\": \"Alice Doe\"\n        },\n        {\n            \"@id\": \"https://spdx.org/licenses/MIT\",\n            \"@type\": \"CreativeWork\",\n            \"name\": \"MIT Licence\",\n            \"identifier\": \"MIT\"\n        }\n    ]\n}"
+    }
+
+---
 apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "ro-crate-validator.fullname" . }}-test-validator"
   labels:
     {{- include "ro-crate-validator.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
   annotations:
     "helm.sh/hook": test
 spec:
@@ -15,17 +37,21 @@ spec:
       args:
         - -f
         - -v
-        - -X
-        - POST
+        - --max-time
+        - "60"
         - http://{{ include "ro-crate-validator.fullname" . }}:{{ .Values.service.port }}/v1/ro_crates/validate_metadata
         - -H
         - 'accept: application/json'
         - -H
         - 'Content-Type: application/json'
-        - -d
-        - '{ "crate_json": "{\"test1\":\"test2\"}" }'
+        - --data-binary
+        # - "@/data/ro-crate-metadata-test.json"
+        - "@/data/dummy.json"
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      configMap:
+        name: "{{ include "ro-crate-validator.fullname" . }}-test-validator"
   restartPolicy: Never
-
-
-# curl -X POST http://localhost:5000/v1/ro_crates/validate_metadata -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "crate_json": "{\"test1\":\"test2\"}" }'
-

@@ -19,5 +19,5 @@ helm upgrade --install ro-crate-validator ./chart --wait [--values config.yaml]
 
 Built-in smoke test
 ```sh
-helm test ro-crate-validator
+helm test ro-crate-validator [--timeout=70s]
 ```
