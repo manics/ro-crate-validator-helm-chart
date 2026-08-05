@@ -49,7 +49,7 @@ spec:
             - name: CELERY_RESULT_BACKEND
               value: {{ .Values.redis.celeryResultBackend | default $defaultRedisUrl }}
             - name: FLASK_APP
-              value: cratey.py
+              value: wsgi.py
             - name: FLASK_ENV
               value: {{ .Values.flask.environment }}
           ports:

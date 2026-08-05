@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/esciencelab/cratey-validator-fivesafes-profile
+  repository: ghcr.io/esciencelab/ro-crate-validation-service-fivesafes-profile
   # repository: ghcr.io/esciencelab/cratey-validator
   pullPolicy: IfNotPresent
   # Overrides image tag, default is the chart appVersion.
@@ -114,15 +114,14 @@ resources: {}
   #   memory: 128Mi
 
 # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-# TODO: enable these
-# livenessProbe:
-#   httpGet:
-#     path: /
-#     port: http
-# readinessProbe:
-#   httpGet:
-#     path: /
-#     port: http
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
 
 # Additional volumes on the output Deployment definition.
 volumes: []
