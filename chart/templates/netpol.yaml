@@ -22,14 +22,6 @@ spec:
 
   egress:
     - ports:
-        - port: {{ .Values.redis.service.port }}
-      to:
-        - podSelector:
-            matchLabels:
-              {{- include "ro-crate-validator.labels" . | nindent 14 }}
-              app.kubernetes.io/component: redis
-
-    - ports:
         # Cluster CoreDNS
         - port: 53
           protocol: UDP
