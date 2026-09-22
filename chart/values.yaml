@@ -142,55 +142,5 @@ tolerations: []
 
 affinity: {}
 
-redis:
-  # Use a minimal bundled Redis
-  # For production consider setting this to false and running Redis separately
-  enabled: true
-  image:
-    repository: docker.io/library/redis
-    pullPolicy: IfNotPresent
-    tag: 8.6.4-alpine
-  service:
-    port: 6379
-    type: ClusterIP
-  # Set these to if you run your own Redis service e.g. redis://redis:6379/0
-  celeryBrokerUrl: ""
-  celeryResultBackend: ""
-
-  podAnnotations: {}
-  podLabels: {}
-  podSecurityContext: {}
-  securityContext: {}
-  nodeSelector: {}
-  affinity: {}
-  tolerations: {}
-
-celery:
-  # Use a minimal bundled Celery
-  # For production consider setting this to false and running Celery separately
-  enabled: true
-  # Override the image, default is the same as the main application
-  image:
-    repository: ""
-    pullPolicy: ""
-    tag: ""
-  command:
-    - celery
-  args:
-    - -A
-    - app.celery_worker.celery
-    - worker
-    - --loglevel=DEBUG
-    - -E
-
-  replicaCount: 1
-  podAnnotations: {}
-  podLabels: {}
-  podSecurityContext: {}
-  securityContext: {}
-  nodeSelector: {}
-  affinity: {}
-  tolerations: {}
-
 networkPolicy:
   enabled: true

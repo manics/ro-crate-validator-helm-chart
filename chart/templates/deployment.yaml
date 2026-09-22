@@ -1,5 +1,3 @@
-{{ $defaultRedisUrl := printf "redis://%s-redis:%v/0" (include "ro-crate-validator.fullname" .) .Values.redis.service.port }}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,10 +42,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: CELERY_BROKER_URL
-              value: {{ .Values.redis.celeryBrokerUrl | default $defaultRedisUrl }}
-            - name: CELERY_RESULT_BACKEND
-              value: {{ .Values.redis.celeryResultBackend | default $defaultRedisUrl }}
             - name: FLASK_APP
               value: wsgi.py
             - name: FLASK_ENV

@@ -41,7 +41,7 @@ jobs:
       - name: Get logs, including on failure
         if: always()
         run: |
-          for deploy in ro-crate-validator ro-crate-validator-celery ro-crate-validator-redis; do
+          for deploy in ro-crate-validator; do
             echo "::group::$deploy"
             kubectl logs deploy/$deploy
             echo "::endgroup::"
