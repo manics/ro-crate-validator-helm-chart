@@ -8,4 +8,4 @@ type: application
 version: 0.1.0
 
 # This is the container image version of the application.
-appVersion: "2.0"
+appVersion: "2.1"
