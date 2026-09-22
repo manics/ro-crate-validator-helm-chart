@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: j178/prek-action@v2.0.5
+      - uses: j178/prek-action@v3.0.0
 
   test:
     runs-on: ubuntu-24.04
@@ -29,10 +29,14 @@ jobs:
           k3s-channel: v1.36
 
       - name: Install deployment
-        run: helm upgrade --install ro-crate-validator ./chart --wait
+        run: helm upgrade --install ro-crate-validator ./chart --values ci/test-values.yaml --wait
 
-      - name: Run tests
+      - name: Run helm test
+        # This only checks the service is responsive, it doesn't check it's correct
         run: helm test ro-crate-validator --timeout=70s
+
+      - name: Run 5s validation test
+        run: python -munittest ci/test.py
 
       - name: Get logs, including on failure
         if: always()
