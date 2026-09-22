@@ -11,6 +11,8 @@ S3 storage is disabled, so the full RO-Crate cannot be validated.
 
 Only the `POST v1/ro_crates/validate_metadata` endpoint is supported.
 
+Minimal Redis and Celery servers are deployed, but for production you are advised to deploy these seperately.
+
 ## Deploy
 
 ```sh
