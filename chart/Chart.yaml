@@ -5,7 +5,8 @@ description: A service for validating RO-Crates
 type: application
 
 # The chart version, follows semver. This may be different from the application version.
-version: 0.1.0
+# This is automatically set by the CI workflow when triggered by a git tag
+version: 0.0.0
 
 # This is the container image version of the application.
 appVersion: "2.1"

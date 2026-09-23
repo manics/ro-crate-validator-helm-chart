@@ -51,23 +51,29 @@ jobs:
           kubectl logs ro-crate-validator-test-validator
           echo "::endgroup::"
 
-  # Set a single status check for the whole workflow, so that we can use it in a
-  # branch protection rule
-  status-check:
+  publish-chart:
     runs-on: ubuntu-24.04
     needs:
       - lint
       - test
-    if: always()
-    steps:
-      - name: Get job statuses
-        uses: technote-space/workflow-conclusion-action@v3.0.3
-        with:
-          FALLBACK_CONCLUSION: failure
-          STRICT_SUCCESS: true
-        # Status is saved in env.WORKFLOW_CONCLUSION
+    permissions:
+      # Requires write permission to push to the GitHub Pages branch
+      contents: write
+    env:
+      COMMIT_USER: helm-chart-bot
 
-      - name: Status check
-        if: env.WORKFLOW_CONCLUSION != 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Update Chart.yaml version with tag
         run: |
-          exit 1
+          export VERSION=${{ github.ref_name }}
+          yq --inplace '.version = env(VERSION)' chart/Chart.yaml
+          git diff
+
+      - name: Publish to gh-pages
+        uses: manics/helm-gh-pages-action@v0.1.1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          chart-dir: chart
