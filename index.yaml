@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  ro-crate-validator:
+  - apiVersion: v2
+    appVersion: "2.1"
+    created: "2026-09-23T10:30:47.309319882Z"
+    description: A service for validating RO-Crates
+    digest: 29ff32119776e975b931f248a7f6d09a6433877b50db0fd6c4176b99120e2275
+    name: ro-crate-validator
+    type: application
+    urls:
+    - ro-crate-validator-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-09-23T10:30:47.308319163Z"
